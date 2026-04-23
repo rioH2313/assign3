@@ -1,0 +1,21 @@
+Modified the Board logic to count how many X and O pieces are currently on the board. 
+This allowed the program to distinguish between the initial placement phase and the subsequent movement phase.
+
+Updated the click-handling logic so that if the current player has fewer than three pieces on the board, 
+clicking an empty square places a new piece in the same way as in standard tic-tac-toe.
+
+Implemented the following features:
+1. Added a restriction so that each player can place at most three pieces on the board
+2. Implemented logic to prevent additional placements after three pieces, requiring players to move existing pieces instead
+3. Introduced a two-click movement system, where the first click selects a piece and the second click specifies the destination
+4. Implemented adjacency checking so that pieces can only move to neighboring squares (including diagonals)
+5. Added the special center-square rule for the movement phase. If a player has three pieces on the board and one of them is in the center square, 
+   the move must either result in a win or vacate the center square
+
+Used ./helper dev to test the application in the browser and verified the following: 
+- Each player can place at most three pieces 
+- Movement is only possible after the placement phase 
+- Movement is performed using two clicks 
+- Non-adjacent moves are rejected 
+- Invalid moves reset the selection state 
+- The center-square rule is correctly enforced

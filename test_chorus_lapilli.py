@@ -101,10 +101,16 @@ class TestChorusLapilli(unittest.TestCase):
         '''
 
     # ========================== [HELPER FUNCTIONS] ===========================
+    def get_tiles(self):
+        return self.driver.find_elements(By.XPATH, self.BOARD_TILE_XPATH)
 
+    def click_tile(self, index):
+        tiles = self.get_tiles()
+        tiles[index].click()
+        
     def assertBoardEmpty(self, tiles):
         '''Checks if all board tiles are empty.
-
+        
         Arguments:
           tiles: List[WebElement] - a board consisting of 9 buttons elements
         '''
@@ -117,7 +123,7 @@ class TestChorusLapilli(unittest.TestCase):
 
     def assertTileIs(self, tile, symbol_set):
         '''Checks if a certain tile has a certain symbol.
-
+        
         Arguments:
           tile: WebElement - the button element to check
           symbol_set: str - a string containing all the valid symbols
@@ -154,7 +160,51 @@ class TestChorusLapilli(unittest.TestCase):
         self.assertTileIs(tiles[0], self.SYMBOL_BLANK)
         tiles[0].click()
         self.assertTileIs(tiles[0], self.SYMBOL_X)
+        
+    def test_cannot_place_more_than_three_pieces(self):
+        '''Check that a player cannot place a fourth piece.'''
+        self.click_tile(0)  # X
+        self.click_tile(3)  # O
+        self.click_tile(1)  # X
+        self.click_tile(4)  # O
+        self.click_tile(8)  # X
+        self.click_tile(5)  # O
+        tiles = self.get_tiles()
+        self.assertTileIs(tiles[2], self.SYMBOL_BLANK)
+        self.click_tile(2)  # X attempts a fourth placement
+        tiles = self.get_tiles()
+        self.assertTileIs(tiles[2], self.SYMBOL_BLANK)
 
+    def test_can_move_to_adjacent_square(self):
+        '''Check that a player can move a piece to an adjacent empty square.'''
+        self.click_tile(0)  # X
+        self.click_tile(8)  # O
+        self.click_tile(2)  # X
+        self.click_tile(7)  # O
+        self.click_tile(6)  # X
+        self.click_tile(5)  # O
+
+        # X moves from 6 to adjacent empty square 3
+        self.click_tile(6)
+        self.click_tile(3)
+
+        tiles = self.get_tiles()
+        self.assertTileIs(tiles[6], self.SYMBOL_BLANK)
+        self.assertTileIs(tiles[3], self.SYMBOL_X)
+
+    def test_no_moves_after_win(self):
+        '''Check that no additional moves are allowed after a win.'''
+        self.click_tile(0)  # X
+        self.click_tile(3)  # O
+        self.click_tile(1)  # X
+        self.click_tile(4)  # O
+        self.click_tile(2)  # X wins
+        self.assertIn('Winner: X', self.driver.page_source)
+        tiles = self.get_tiles()
+        self.assertTileIs(tiles[5], self.SYMBOL_BLANK)
+        self.click_tile(5)
+        tiles = self.get_tiles()
+        self.assertTileIs(tiles[5], self.SYMBOL_BLANK)
 
 # ================= [DO NOT MAKE ANY CHANGES BELOW THIS LINE] =================
 

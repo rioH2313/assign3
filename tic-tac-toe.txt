@@ -1,0 +1,17 @@
+- Initialized the development environment and launched the local server using ./helper dev to confirm that 
+the starter application was working correctly in the browser.
+- Replaced the starter component with the tic-tac-toe implementation based on the official React tutorial. 
+This involved defining separate Square and Board components and restructuring the application to use React state.
+- Represented the board as a 9-element array and passed click handlers from the parent component to each square. 
+This ensured that the game state was centrally managed while still allowing individual components to handle user interaction.
+- Implemented move history using a history array and a currentMove index. This enabled time-travel functionality and 
+demonstrated how React preserves previous states.
+- Added winner detection using a calculateWinner function that checks all possible winning combinations.
+Tested the application in the browser and verified that:
+- Players alternate between X and O
+- Squares cannot be overwritten
+- A winner is correctly displayed
+- Move history buttons function as expected
+
+Reviewed the final implementation to better understand how React state, props, event handling, and 
+conditional rendering interact in a small interactive application.

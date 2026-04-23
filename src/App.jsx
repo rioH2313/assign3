@@ -8,19 +8,58 @@ function Square({ value, onSquareClick }) {
   );
 }
 
-function Board({ xIsNext, squares, onPlay }) {
-  function handleClick(i) {
-    if (calculateWinner(squares) || squares[i]) {
+function Board({ xIsNext, squares, onPlay, selectedSquare, setSelectedSquare }) {
+  const currentPlayer = xIsNext ? 'X' : 'O';
+  const xCount = squares.filter((square) => square === 'X').length;
+  const oCount = squares.filter((square) => square === 'O').length;
+  const currentPlayerCount = currentPlayer === 'X' ? xCount : oCount;
+  
+function handleClick(i) {
+  if (calculateWinner(squares)) {
+    return;
+  }
+
+  if (currentPlayerCount < 3) {
+    if (squares[i]) {
       return;
     }
+
     const nextSquares = squares.slice();
-    if (xIsNext) {
-      nextSquares[i] = 'X';
-    } else {
-      nextSquares[i] = 'O';
-    }
+    nextSquares[i] = currentPlayer;
     onPlay(nextSquares);
+    return;
   }
+
+  if (selectedSquare === null) {
+    if (squares[i] === currentPlayer) {
+      setSelectedSquare(i);
+    }
+    return;
+  }
+
+  if (squares[i] !== null) {
+    setSelectedSquare(null);
+    return;
+  }
+
+  if (!isAdjacent(selectedSquare, i)) {
+    setSelectedSquare(null);
+    return;
+  }
+
+  const nextSquares = squares.slice();
+  nextSquares[selectedSquare] = null;
+  nextSquares[i] = currentPlayer;
+  const centerOccupiedByCurrentPlayer = squares[4] === currentPlayer;
+  const vacatesCenter = selectedSquare === 4;
+  const winsMove = calculateWinner(nextSquares) === currentPlayer;
+  if (centerOccupiedByCurrentPlayer && !vacatesCenter && !winsMove) {
+    setSelectedSquare(null);
+    return;
+  }
+  setSelectedSquare(null);
+  onPlay(nextSquares);
+}
 
   const winner = calculateWinner(squares);
   let status;
@@ -52,9 +91,21 @@ function Board({ xIsNext, squares, onPlay }) {
   );
 }
 
-export default function Game() {
+function isAdjacent(from, to) {
+
+  const fromRow = Math.floor(from / 3);
+  const fromCol = from % 3;
+  const toRow = Math.floor(to / 3);
+  const toCol = to % 3;
+  const rowDiff = Math.abs(fromRow - toRow);
+  const colDiff = Math.abs(fromCol - toCol);
+  return rowDiff <= 1 && colDiff <= 1 && !(rowDiff === 0 && colDiff === 0);
+}
+
+export default function App() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
+  const [selectedSquare, setSelectedSquare] = useState(null);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
@@ -82,13 +133,19 @@ export default function Game() {
     );
   });
 
-  return (
-    <div className="game">
-      <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+return (
+  <div className="game">
+    <div className="game-board">
+      <Board
+        xIsNext={xIsNext}
+        squares={currentSquares}
+        onPlay={handlePlay}
+        selectedSquare={selectedSquare}
+        setSelectedSquare={setSelectedSquare}
+        />
       </div>
-      <div className="game-info">
-        <ol>{moves}</ol>
+    <div className="game-info">
+      <ol>{moves}</ol>
       </div>
     </div>
   );
@@ -111,5 +168,6 @@ function calculateWinner(squares) {
       return squares[a];
     }
   }
+
   return null;
 }
